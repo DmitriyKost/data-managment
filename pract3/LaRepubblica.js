@@ -18,13 +18,13 @@ const fetchPage = async (url) => {
         const response = await superagent
             .get(url)
             .set('User-Agent', userAgent)
-            .timeout({ response: 5000, deadline: 10000 });
-        await delay(1000, 3000);
+            .timeout({ response: 5000, deadline: 10000 });  
+        await delay(1000, 3000);  
         return response;
     } catch (error) {
         console.error(`Error fetching ${url}: ${error.message}`);
-        await delay(3000, 5000);
-        throw error;
+        await delay(3000, 5000);  
+        throw error;  
     }
 };
 
@@ -42,19 +42,24 @@ const fetchPage = async (url) => {
         const stream = fs.createWriteStream(jsonFilePath, { flags: 'w' });
         stream.write('[\n');
         let isFirstEntry = true;
-
         let navigationLinks = [];
-        $('div.ls-page-header__panel__navigation')
-            .find('ul.ls-page-header__panel__menu__links a')
-            .each((_, link) => {
-                const href = $(link).attr('href');
-                if (href) {
-                    const fullLink = href.startsWith('http') ? href : `https://www.lastampa.it${href}`;
-                    navigationLinks.push({ href: fullLink, text: $(link).text().trim() });
-                }
-            });
 
-        navigationLinks = navigationLinks.filter((value, index, self) =>
+        $('nav.main-navigation').find('li.menu-sezioni__item a.menu-sezioni__link').each((_, link) => {
+            const href = $(link).attr('href');
+            if (href) {
+                const fullLink = href.startsWith('http') ? href : `https://www.repubblica.it${href}`;
+                navigationLinks.push({ href: fullLink, text: $(link).text().trim() });
+            }
+        });
+        $('nav.main-navigation').find('li > a').each((_, link) => {
+            const href = $(link).attr('href');
+            if (href) {
+                const fullLink = href.startsWith('http') ? href : `https://www.repubblica.it${href}`;
+                navigationLinks.push({ href: fullLink, text: $(link).text().trim() });
+            }
+        });
+
+        navigationLinks = navigationLinks.filter((value, index, self) => 
             self.findIndex(link => link.href === value.href) === index
         );
         console.log(`Found ${navigationLinks.length} navigation links.`);
@@ -62,7 +67,7 @@ const fetchPage = async (url) => {
         for (const navLink of navigationLinks) {
             try {
                 console.log(`Parsing section: ${navLink.href}`);
-
+                
                 const sectionResponse = await fetchPage(navLink.href);
                 const section$ = cheerio.load(sectionResponse.text);
 
@@ -82,7 +87,7 @@ const fetchPage = async (url) => {
                 });
             } catch (error) {
                 console.error(`Error parsing section ${navLink.href}: ${error.message}`);
-                continue;
+                continue;  
             }
         }
 

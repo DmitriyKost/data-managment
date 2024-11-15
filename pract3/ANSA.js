@@ -18,13 +18,13 @@ const fetchPage = async (url) => {
         const response = await superagent
             .get(url)
             .set('User-Agent', userAgent)
-            .timeout({ response: 5000, deadline: 10000 });  
-        await delay(1000, 3000);  
+            .timeout({ response: 5000, deadline: 10000 });
+        await delay(1000, 3000);
         return response;
     } catch (error) {
         console.error(`Error fetching ${url}: ${error.message}`);
-        await delay(3000, 5000); 
-        throw error;  
+        await delay(3000, 5000);
+        throw error;
     }
 };
 
@@ -50,7 +50,7 @@ const fetchPage = async (url) => {
             const sectionData = $(element).attr('data-section');
             $(element).find('li a[href]').each((_, aElement) => {
                 const sectionLink = $(aElement).attr('href');
-                
+
                 if (sectionData && sectionLink) {
                     const fullLink = sectionLink.startsWith('http') ? sectionLink : `https://www.ansa.it${sectionLink}`;
                     sectionLinks.push({ sectionData, sectionLink: fullLink });
@@ -58,7 +58,11 @@ const fetchPage = async (url) => {
             });
         });
 
-        sectionLinks = sectionLinks.filter((value, index, self) => self.indexOf(value) === index);
+        sectionLinks = sectionLinks.filter((value, index, self) =>
+            index === self.findIndex((t) => (
+                t.sectionData === value.sectionData && t.sectionLink === value.sectionLink
+            ))
+        );
         console.log(`Found ${sectionLinks.length} sections to parse.`);
 
         for (const { sectionData, sectionLink } of sectionLinks) {
@@ -79,7 +83,7 @@ const fetchPage = async (url) => {
                 });
             } catch (error) {
                 console.error(`Error fetching section ${sectionLink}: ${error.message}`);
-                continue;  
+                continue;
             }
         }
         stream.write('\n]');
