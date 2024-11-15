@@ -77,7 +77,7 @@ const fetchPage = async (url) => {
 
                     if (title && href) {
                         if (!isFirstEntry) stream.write(',\n');
-                        stream.write(JSON.stringify({ title, href, section: sectionData }, null, 2));
+                        stream.write(JSON.stringify({ title, href }, null, 2));
                         isFirstEntry = false;
                     }
                 });
