@@ -15,13 +15,17 @@ const path = require('path');
         const stream = fs.createWriteStream(jsonFilePath, { flags: 'w' });
         stream.write('[\n');
         let isFirstEntry = true;
-        $('a.has-text-black').each((index, element) => {
-            const title = $(element).text().trim();
-            const href = $(element).attr('href');
-            
+        $('.media-news__content').each((index, newsContainer) => {
+            const titleElement = $(newsContainer).find('h4.title-art-hp a.has-text-black');
+            const authorElement = $(newsContainer).find('.author-art');
+            const href = titleElement.attr('href');
+            const title = titleElement.text().trim();
+            const author = authorElement.text().trim() || 'Не найден'; 
+
             if (title && href) {
+                const newsData = { title, href, author };
                 if (!isFirstEntry) stream.write(',\n');
-                stream.write(JSON.stringify({ title, href }, null, 2));
+                stream.write(JSON.stringify(newsData, null, 2));
                 isFirstEntry = false;
             }
         });

@@ -40,7 +40,7 @@ const XLSX = require('xlsx');
                     results.push({
                         title: link.innerText.trim(),
                         href: link.href,
-                        author: author ? author.textContent.trim() : "Автор не найден"
+                        author: author ? author.textContent.trim() : "Не найден"
                     });
                 }
             });
