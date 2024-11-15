@@ -1,6 +1,6 @@
 const superagent = require('superagent');
-const cheerio = require('cheerio');
 const fs = require('fs');
+const cheerio = require('cheerio');
 const path = require('path');
 
 const userAgents = [
@@ -23,14 +23,14 @@ const fetchPage = async (url) => {
         return response;
     } catch (error) {
         console.error(`Error fetching ${url}: ${error.message}`);
-        await delay(3000, 5000);  
+        await delay(3000, 5000); 
         throw error;  
     }
 };
 
 (async () => {
     try {
-        const response = await fetchPage('https://www.corriere.it');
+        const response = await fetchPage('https://www.ansa.it');
         const $ = cheerio.load(response.text);
 
         const dir = './scraped';
@@ -38,20 +38,22 @@ const fetchPage = async (url) => {
             fs.mkdirSync(dir);
         }
 
-        const jsonFilePath = path.join(dir, 'CorriereDellaSera.json');
+        const jsonFilePath = path.join(dir, 'ANSA.json');
         const stream = fs.createWriteStream(jsonFilePath, { flags: 'w' });
 
         stream.write('[\n');
         let isFirstEntry = true;
-
         let sectionLinks = [];
-        sectionLinks.push('https://www.corriere.it');
-        $('div.container').each((_, container) => {
-            $(container).find('li.submenu-list-item a.submenu-link').each((_, aElement) => {
+        sectionLinks.push('https://www.ansa.it')
+
+        $('div.section').each((_, element) => {
+            const sectionData = $(element).attr('data-section');
+            $(element).find('li a[href]').each((_, aElement) => {
                 const sectionLink = $(aElement).attr('href');
-                if (sectionLink) {
-                    const fullLink = sectionLink.startsWith('http') ? sectionLink : `https://www.corriere.it${sectionLink}`;
-                    sectionLinks.push(fullLink);
+                
+                if (sectionData && sectionLink) {
+                    const fullLink = sectionLink.startsWith('http') ? sectionLink : `https://www.ansa.it${sectionLink}`;
+                    sectionLinks.push({ sectionData, sectionLink: fullLink });
                 }
             });
         });
@@ -59,37 +61,32 @@ const fetchPage = async (url) => {
         sectionLinks = sectionLinks.filter((value, index, self) => self.indexOf(value) === index);
         console.log(`Found ${sectionLinks.length} sections to parse.`);
 
-        for (const sectionLink of sectionLinks) {
+        for (const { sectionData, sectionLink } of sectionLinks) {
             try {
                 console.log(`Parsing section: ${sectionLink}`);
+
                 const sectionResponse = await fetchPage(sectionLink);
                 const section$ = cheerio.load(sectionResponse.text);
-
-                section$('.media-news__content').each((_, newsContainer) => {
-                    const titleElement = section$(newsContainer).find('h4.title-art-hp a.has-text-black');
-                    const authorElement = section$(newsContainer).find('.author-art');
-                    const href = titleElement.attr('href');
-                    const title = titleElement.text().trim();
-                    const author = authorElement.text().trim() || 'Не найден';
+                section$('div.article-content a[href]').each((_, element) => {
+                    const title = section$(element).text().trim();
+                    const href = section$(element).attr('href');
 
                     if (title && href) {
-                        const newsData = { title, href, author };
                         if (!isFirstEntry) stream.write(',\n');
-                        stream.write(JSON.stringify(newsData, null, 2));
+                        stream.write(JSON.stringify({ title, href, section: sectionData }, null, 2));
                         isFirstEntry = false;
                     }
                 });
             } catch (error) {
                 console.error(`Error fetching section ${sectionLink}: ${error.message}`);
-                continue; 
+                continue;  
             }
         }
-
         stream.write('\n]');
         stream.end();
 
         console.log(`Data successfully saved to ${jsonFilePath}`);
     } catch (error) {
-        console.error('Error during the scraping process:', error);
+        console.error('Error:', error);
     }
 })();
