@@ -45,7 +45,7 @@ const fetchPage = async (url) => {
         stream.write('[\n');
         let isFirstEntry = true;
 
-        let sectionLinks = [];
+        let sectionLinks = [baseUrl];
         $('div.ls-page-header__panel__navigation').find('ul.ls-page-header__panel__menu__links li a').each((_, link) => {
             let href = $(link).attr('href');
             if (href) {
@@ -66,11 +66,8 @@ const fetchPage = async (url) => {
         for (const sectionLink of sectionLinks) {
             try {
                 console.log(`Parsing section: ${sectionLink.href}`);
-
                 const sectionResponse = await fetchPage(sectionLink.href);
                 const section$ = cheerio.load(sectionResponse.text);
-
-                const sectionName = sectionLink.href.split('/').pop() || 'Unknown Section';
 
                 section$('article a[href]').each((_, element) => {
                     const link = $(element);
@@ -86,7 +83,8 @@ const fetchPage = async (url) => {
                         stream.write(JSON.stringify({
                             title: title,
                             href: link.attr('href'),
-                            author: authorElement.length > 0 ? authorElement.text().trim() : 'Не найден'
+                            author: authorElement.length > 0 ? authorElement.text().trim() : null,
+                            source_url: sectionLink.href  
                         }, null, 2));
 
                         isFirstEntry = false;

@@ -42,7 +42,7 @@ const fetchPage = async (url) => {
         const stream = fs.createWriteStream(jsonFilePath, { flags: 'w' });
         stream.write('[\n');
         let isFirstEntry = true;
-        let navigationLinks = [];
+        let navigationLinks = ['https://www.repubblica.it'];
 
         $('nav.main-navigation').find('li.menu-sezioni__item a.menu-sezioni__link').each((_, link) => {
             const href = $(link).attr('href');
@@ -51,6 +51,7 @@ const fetchPage = async (url) => {
                 navigationLinks.push({ href: fullLink, text: $(link).text().trim() });
             }
         });
+
         $('nav.main-navigation').find('li > a').each((_, link) => {
             const href = $(link).attr('href');
             if (href) {
@@ -62,12 +63,12 @@ const fetchPage = async (url) => {
         navigationLinks = navigationLinks.filter((value, index, self) => 
             self.findIndex(link => link.href === value.href) === index
         );
+        
         console.log(`Found ${navigationLinks.length} navigation links.`);
 
         for (const navLink of navigationLinks) {
             try {
                 console.log(`Parsing section: ${navLink.href}`);
-                
                 const sectionResponse = await fetchPage(navLink.href);
                 const section$ = cheerio.load(sectionResponse.text);
 
@@ -80,7 +81,8 @@ const fetchPage = async (url) => {
                     stream.write(JSON.stringify({
                         title: link.text().trim(),
                         href: link.attr('href'),
-                        author: authorElement.length > 0 ? authorElement.text().trim() : 'Не найден'
+                        author: authorElement.length > 0 ? authorElement.text().trim() : null,
+                        source_url: navLink.href 
                     }, null, 2));
 
                     isFirstEntry = false;

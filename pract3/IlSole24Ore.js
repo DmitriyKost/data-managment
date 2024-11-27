@@ -44,6 +44,8 @@ const fetchPage = async (url) => {
         stream.write('[\n');
         let isFirstEntry = true;
         let navigationLinks = [];
+        navigationLinks.push('https://www.ilsole24ore.com');
+        
         $('nav[aria-label="Navigazione principale"]')
             .find('.hnav-item a.hlink')
             .each((_, link) => {
@@ -63,7 +65,11 @@ const fetchPage = async (url) => {
                     navigationLinks.push({ href: fullLink, text: $(link).text().trim() });
                 }
             });
-        navigationLinks = navigationLinks.filter((value, index, self) => self.indexOf(value) === index);
+
+        navigationLinks = navigationLinks.filter((value, index, self) => 
+            index === self.findIndex((t) => t.href === value.href)
+        );
+
         console.log(`Found ${navigationLinks.length} navigation links.`);
         for (const navLink of navigationLinks) {
             try {
@@ -97,7 +103,8 @@ const fetchPage = async (url) => {
                         stream.write(JSON.stringify({
                             title: link.text().trim(),
                             href: link.attr('href'),
-                            author: author ? author.text().trim() : 'Не найден'
+                            author: author ? author.text().trim() : null,
+                            source_url: navLink.href 
                         }, null, 2));
 
                         isFirstEntry = false;

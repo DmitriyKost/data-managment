@@ -44,7 +44,7 @@ const fetchPage = async (url) => {
         stream.write('[\n');
         let isFirstEntry = true;
         let sectionLinks = [];
-        sectionLinks.push('https://www.ansa.it')
+        sectionLinks.push('https://www.ansa.it');
 
         $('div.section').each((_, element) => {
             const sectionData = $(element).attr('data-section');
@@ -77,7 +77,11 @@ const fetchPage = async (url) => {
 
                     if (title && href) {
                         if (!isFirstEntry) stream.write(',\n');
-                        stream.write(JSON.stringify({ title, href }, null, 2));
+                        stream.write(JSON.stringify({ 
+                            title, 
+                            href, 
+                            source_url: sectionLink 
+                        }, null, 2));
                         isFirstEntry = false;
                     }
                 });

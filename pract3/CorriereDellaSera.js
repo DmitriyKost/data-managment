@@ -70,10 +70,15 @@ const fetchPage = async (url) => {
                     const authorElement = section$(newsContainer).find('.author-art');
                     const href = titleElement.attr('href');
                     const title = titleElement.text().trim();
-                    const author = authorElement.text().trim() || 'Не найден';
+                    const author = authorElement.text().trim() || null;
 
                     if (title && href) {
-                        const newsData = { title, href, author };
+                        const newsData = { 
+                            title, 
+                            href, 
+                            author, 
+                            source_url: sectionLink 
+                        };
                         if (!isFirstEntry) stream.write(',\n');
                         stream.write(JSON.stringify(newsData, null, 2));
                         isFirstEntry = false;
