@@ -11,7 +11,7 @@ const scraped = [
 
 (async () => {
     try {
-        await sequelize.sync(); // Uncomment if there's no database
+        // await sequelize.sync(); // Uncomment if there's no database
 
         for (const file of scraped) {
             console.log(`Processing file: ${file}`);
