@@ -4,6 +4,7 @@ CREATE TABLE News (
   href TEXT NOT NULL,
   author TEXT,
   source TEXT NOT NULL,
+  source_url TEXT NOT NULL,
   timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
