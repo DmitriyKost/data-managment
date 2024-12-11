@@ -1,0 +1,17 @@
+CREATE TABLE News (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, 
+  title TEXT NOT NULL,
+  href TEXT NOT NULL,
+  author TEXT,
+  source TEXT NOT NULL,
+  source_url TEXT NOT NULL,
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE NewsHistory (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  news_id INTEGER NOT NULL,            
+  change_type TEXT NOT NULL,           -- "INSERT", "UPDATE", "DELETE"
+  change_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (news_id) REFERENCES News(id)
+);
