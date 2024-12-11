@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Метрики по источникам</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container my-5">
+        <h2 class="text-center mb-4">Метрики для новостных источников</h2>
+
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h3 class="card-title text-center">1. Средняя длина заголовков</h3>
+                        <canvas id="averageTitleLengthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-8 offset-md-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h3 class="card-title text-center">2. Доля записей без авторов</h3>
+                        <canvas id="noAuthorsPieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-8 offset-md-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h3 class="card-title text-center">3. Количество уникальных записей</h3>
+                        <canvas id="uniqueRecordsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data for the charts
+        const noAuthorsData = {
+            labels: [
+                'Il Sole 24 Ore',
+                'La Repubblica',
+                'La Stampa',
+                'Corriere della Sera',
+                'ANSA'
+            ],
+            datasets: [{
+                label: 'Доля записей без авторов (%)',
+                data: [0.37, 45.87, 69.18, 5.21, 100],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+            }]
+        };
+
+        const uniqueRecordsData = {
+            labels: [
+                'Il Sole 24 Ore',
+                'La Repubblica',
+                'La Stampa',
+                'Corriere della Sera',
+                'ANSA'
+            ],
+            datasets: [{
+                label: 'Количество уникальных записей',
+                data: [1054, 3189, 1629, 1640, 2965],
+                backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(75, 192, 192, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(153, 102, 255, 0.6)'],
+                borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(75, 192, 192, 1)', 'rgba(255, 206, 86, 1)', 'rgba(153, 102, 255, 1)'],
+                borderWidth: 1
+            }]
+        };
+
+        const avgLengthData = {
+            labels: [
+                'Il Sole 24 Ore',
+                'La Repubblica',
+                'La Stampa',
+                'Corriere della Sera',
+                'ANSA'
+            ],
+            datasets: [{
+                label: 'Средняя длина заголовков (слов)',
+                data: [9.37, 7.74, 11.82, 15.17, 9.36],
+                backgroundColor: ['rgba(54, 162, 235, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)'],
+                borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)'],
+                borderWidth: 1
+            }]
+        };
+
+        const ctxAvgLength = document.getElementById('averageTitleLengthChart').getContext('2d');
+        new Chart(ctxAvgLength, {
+            type: 'bar',
+            data: avgLengthData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {beginAtZero: true}
+                }
+            }
+        });
+
+        const ctxNoAuthors = document.getElementById('noAuthorsPieChart').getContext('2d');
+        new Chart(ctxNoAuthors, {
+            type: 'pie',
+            data: noAuthorsData
+        });
+
+        const ctxUniqueRecords = document.getElementById('uniqueRecordsChart').getContext('2d');
+        new Chart(ctxUniqueRecords, {
+            type: 'bar',
+            data: uniqueRecordsData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {beginAtZero: true}
+                }
+            }
+        });
+
+        function updateChart(chart, newData) {
+            chart.data.datasets[0].data = newData;
+            chart.update();
+        }
+
+
+        function fetchNewData() {
+            fetch('/api/statistics/average_title_length')
+                .then(response => response.json())
+                .then(data => {
+                    updateChart(avgLengthData, data)
+                })
+                .catch(error => console.error('Error fetch:', error));
+            fetch('/api/statistics/no_author')
+                .then(response => response.json())
+                .then(data => {
+                    updateChart(noAuthorsData, data)
+                })
+                .catch(error => console.error('Error fetch:', error));
+            fetch('/api/statistics/unique_records')
+                .then(response => response.json())
+                .then(data => {
+                    updateChart(uniqueRecordsData, data)
+                })
+                .catch(error => console.error('Error fetch:', error));
+        }
+        fetchNewData();
+    </script>
+</body>
+</html>

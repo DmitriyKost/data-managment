@@ -25,6 +25,7 @@ async function scrapeAndSave() {
     await save.saveToDB();
 }
 
-cron.schedule('0 0 * * *', async () => {
+// Every day at midnigth
+cron.schedule('*/15 * * * *', async () => {
     await scrapeAndSave();
 });

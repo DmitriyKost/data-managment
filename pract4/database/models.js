@@ -60,8 +60,35 @@ const NewsHistory = sequelize.define('NewsHistory', {
     },
 });
 
+const TaskStatus = sequelize.define('TaskStatus', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+    },
+    task_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    status: {
+        type: DataTypes.STRING,
+        allowNull: false, 
+    },
+    start_time: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+    },
+    end_time: {
+        type: DataTypes.DATE,
+    },
+    message: {
+        type: DataTypes.TEXT,
+    },
+});
+
 module.exports = {
     sequelize,
     News,
     NewsHistory,
+    TaskStatus,
 };
